@@ -1,60 +1,21 @@
 /**
- * TypeScript Type Definitions for HTML Renderer Library
+ * TypeScript Type Definitions for Shadow HTML Renderer Library
  *
  * This file contains all type definitions used across the HTML rendering system.
- * It serves as the single source of truth for type contracts between components,
- * composables, and utilities.
+ * It serves as the single source of truth for type contracts between utilities
+ * and renderer functions.
+ *
+ * This library is framework-agnostic and can be used with any JavaScript framework
+ * or vanilla JavaScript.
  */
 
-import type { Ref } from 'vue'
-
 /**
- * Configuration options for the HTML renderer composable
+ * Configuration options for the HTML renderer
  */
 export interface IHtmlRendererOptions {
   /**
    * The raw HTML string to be rendered.
    * Can be a complete HTML document or a fragment.
-   */
-  html: string
-}
-
-/**
- * Return type for the useHtmlRenderer composable
- */
-export interface IHtmlRendererComposable {
-  /**
-   * Template ref to bind to the host container element.
-   * The renderer will attach content to this element.
-   *
-   * @example
-   * ```vue
-   * <template>
-   *   <div :ref="hostRef"></div>
-   * </template>
-   * ```
-   */
-  hostRef: Ref<HTMLElement | undefined>
-
-  /**
-   * Function to clear all rendered content from the shadow root.
-   * Useful for manual cleanup or re-rendering scenarios.
-   */
-  clear: () => void
-
-  /**
-   * Reference to the Shadow Root.
-   */
-  shadowRoot: Ref<ShadowRoot | undefined>
-}
-
-/**
- * Props for the HtmlRenderer Vue component
- */
-export interface IHtmlRendererProps {
-  /**
-   * The raw HTML string to be rendered.
-   * Required prop that contains the content to display.
    */
   html: string
 }

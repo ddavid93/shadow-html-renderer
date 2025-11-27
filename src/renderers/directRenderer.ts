@@ -20,7 +20,6 @@
  * @module directRenderer
  */
 
-import { nextTick } from 'vue'
 import { findPlaceholderNode, normalizeAttr, normalizeHtml, uid } from '../extras/utils'
 import type { IScriptMeta } from '../extras/types'
 
@@ -197,7 +196,7 @@ export function insertScriptAtPlaceholder(root: ParentNode, meta: IScriptMeta): 
  * 4. Executes scripts in proper order:
  *    - Sequential scripts: Execute in order, each waits for previous
  *    - Async scripts: Execute independently without blocking
- *    - Defer scripts: Execute after Vue nextTick, in order
+ *    - Defer scripts: Execute after DOM flush (microtask), in order
  *
  * Script execution mirrors browser behavior to ensure proper timing and ordering.
  *
@@ -254,8 +253,8 @@ export async function renderDirectly(target: HTMLElement, html: string): Promise
     void insertScriptAtPlaceholder(target, m)
   }
 
-  // 3) After Vue DOM flush, run defer scripts in-order
-  await nextTick()
+  // 3) After DOM flush (microtask), run defer scripts in-order
+  await Promise.resolve()
   for (const m of deferScripts) {
     await insertScriptAtPlaceholder(target, m)
   }

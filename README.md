@@ -1,9 +1,9 @@
-# VueHTMLRenderer
+# Shadow HTML Renderer
 
-A powerful and flexible Vue library for rendering arbitrary HTML content using Shadow DOM with complete style isolation and full script execution support. Compatible with Vue 2.7+ and Vue 3.
+A powerful and flexible framework-agnostic library for rendering HTML content into Shadow DOM with complete style isolation and full script execution support. Works with any JavaScript framework (React, Vue, Angular, Svelte, etc.) or vanilla JavaScript.
 
 > **⚠️ SECURITY WARNING**  
-> **This library does NOT sanitize or validate HTML content. If you render HTML containing malicious scripts, those scripts WILL execute. Always sanitize untrusted HTML content before passing it to this component.**
+> **This library does NOT sanitize or validate HTML content. If you render HTML containing malicious scripts, those scripts WILL execute. Always sanitize untrusted HTML content before passing it to this library.**
 
 ## 📋 Table of Contents
 
@@ -14,17 +14,16 @@ A powerful and flexible Vue library for rendering arbitrary HTML content using S
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Reference](#api-reference)
-- [Rendering Modes Comparison](#rendering-modes-comparison)
 - [Examples](#examples)
 - [Best Practices](#best-practices)
- - [Code Style](#code-style)
- - [Contributing](#-contributing)
+- [Code Style](#code-style)
+- [Contributing](#-contributing)
 
 ---
 
 ## 🎯 Overview
 
-This library provides a unified solution for rendering HTML content in Vue applications (Vue 2.7+ and Vue 3) with full control over rendering behavior. It addresses common challenges when working with dynamic HTML content, such as:
+This library provides a unified solution for rendering HTML content in any JavaScript application with full control over rendering behavior. It addresses common challenges when working with dynamic HTML content, such as:
 
 - **Script Execution**: Execute embedded JavaScript with proper browser-like semantics
 - **Style Isolation**: Prevent CSS conflicts using Shadow DOM
@@ -68,7 +67,7 @@ You might wonder: "Why not just use an `<iframe>`?" Here are the key reasons:
 ✅ **Smart Script Handling**: Controlled execution with proper async/defer/sequential semantics  
 ✅ **Efficient Style Isolation**: Shadow DOM provides isolation without the overhead  
 ✅ **Better Performance**: Lower memory footprint, faster rendering  
-✅ **Seamless Integration**: Direct access to Vue context and reactivity  
+✅ **Framework Agnostic**: Works with any JavaScript framework or vanilla JS  
 ✅ **Font Loading**: Automatic handling of @font-face declarations in Shadow DOM
 
 ---
@@ -81,103 +80,94 @@ You might wonder: "Why not just use an `<iframe>`?" Here are the key reasons:
 - ✅ Automatic @font-face extraction and injection
 - ✅ Browser-like script execution semantics
 - ✅ CSS encapsulation (no style leakage)
-- ✅ Vue Composition API (Vue 2.7+ and Vue 3)
+- ✅ Framework agnostic (works with React, Vue, Angular, Svelte, vanilla JS)
 - ✅ Full TypeScript support
 - ✅ Comprehensive documentation
-- ✅ Custom Element compatibility
+- ✅ Zero dependencies
 - ✅ Clean lifecycle management
-- ✅ Framework-agnostic utilities
 
 ---
 
 ## 🏗️ Architecture
 
-The library is organized by responsibility for easy maintenance and potential library distribution:
+The library is organized by responsibility for easy maintenance:
 
 ```
-vue-html-renderer/
+shadow-html-renderer/
 ├── src/
-│   ├── App.vue                    # Demo app component (for local development)
+│   ├── main.ts                    # Library entry point with exports
 │   ├── extras/
 │   │   ├── types.ts               # TypeScript type definitions
 │   │   └── utils.ts               # Shared utility functions
-│   ├── composables/
-│   │   └── useHtmlRenderer.ts     # Composable (internal use)
 │   ├── renderers/
 │   │   ├── shadowRenderer.ts      # Shadow DOM rendering orchestrator
 │   │   └── directRenderer.ts      # Direct rendering with script execution
-│   └── styles/                    # Font-face extraction utilities (SRP-focused)
-│       ├── cssUtils.ts            # Pure CSS/text helpers (strip, imports, rebase URLs, base URL)
-│       ├── fontFaceCollector.ts   # Recursively collect @font-face from <style>, @import, and <link>
-│       └── fontInjector.ts        # Dedup and inject into <head> (#shadow-dom-fonts)
+│   └── styles/                    # Font-face extraction utilities
+│       ├── cssUtils.ts            # Pure CSS/text helpers
+│       ├── fontFaceCollector.ts   # Recursively collect @font-face rules
+│       └── fontInjector.ts        # Inject fonts into document head
 └── README.md                      # This file
 ```
 
 ### Design Principles
 
-1. **Separation of Concerns**: Each module has a single, well-defined responsibility
-2. **Type Safety**: Full TypeScript coverage with comprehensive type definitions
-3. **Extensibility**: Easy to add new rendering modes or features
-4. **Reusability**: Framework-agnostic utilities can be used outside Vue
+1. **Framework Agnostic**: No dependencies on any JavaScript framework
+2. **Separation of Concerns**: Each module has a single, well-defined responsibility
+3. **Type Safety**: Full TypeScript coverage with comprehensive type definitions
+4. **Zero Dependencies**: Pure JavaScript/TypeScript with no external dependencies
 5. **Documentation**: Every function and type is thoroughly documented
 
-### Module Responsibilities (Robust Split)
+### Module Responsibilities
 
 - `renderers/shadowRenderer.ts`
   - Orchestrates Shadow DOM rendering
   - Parses HTML and delegates font work to style modules
   - Public API: `extractAndInjectFontFaces`, `renderIntoShadowRoot`, `clearShadowRoot`
 
+- `renderers/directRenderer.ts`
+  - Direct DOM rendering with script execution
+  - Public API: `renderDirectly`, `clearElement`, `extractScriptsWithPlaceholders`, `createExecutableScript`, `insertScriptAtPlaceholder`
+
 - `styles/cssUtils.ts`
   - Pure functions for CSS manipulation and URL handling
   - `stripComments`, `extractFontFaceBlocks`, `createImportRegex`, `resolveUrl`, `rebaseUrls`, `getDocBaseUrl`
 
 - `styles/fontFaceCollector.ts`
-  - Recursively collects `@font-face` rules from:
-    - Inline `<style>` blocks
-    - `@import` chains (nested imports supported)
-    - External stylesheets via `<link rel="stylesheet" href="…">` and preloaded styles (`rel="preload" as="style"`)
-  - Deduplicates visited URLs and rebases relative `url()` sources
+  - Recursively collects `@font-face` rules from inline styles, `@import` chains, and external stylesheets
 
 - `styles/fontInjector.ts`
   - Injects collected rules into a single `<style id="shadow-dom-fonts">` in `document.head`
-  - Avoids duplicate rules by comparing against existing content
 
 ---
 
 ## 📦 Installation
 
-```typescript
-import HtmlRenderer from '@/components/htmlRenderer/HtmlRenderer.vue'
-// or
-import { useHtmlRenderer } from '@/components/htmlRenderer/composables/useHtmlRenderer'
-```
-
-### As a Standalone Library (Future)
-
-For distribution as a standalone npm package:
-
 ```bash
-npm install @your-org/html-renderer
+npm install shadow-html-renderer
 # or
-yarn add @your-org/html-renderer
+yarn add shadow-html-renderer
+# or
+pnpm add shadow-html-renderer
 ```
 
 ---
 
 ## 🚀 Usage
 
-### Basic Component Usage
+### Basic Usage (Vanilla JavaScript)
 
-```vue
-<template>
-  <HtmlRenderer :html="htmlContent" />
-</template>
+```typescript
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
 
-<script setup lang="ts">
-import HtmlRenderer from '@/components/htmlRenderer/HtmlRenderer.vue'
+// Create a host element
+const host = document.createElement('div');
+document.body.appendChild(host);
 
-const htmlContent = `
+// Attach shadow root
+const shadowRoot = host.attachShadow({ mode: 'open' });
+
+// Render HTML into shadow root
+await renderIntoShadowRoot(shadowRoot, `
   <!doctype html>
   <html>
     <head>
@@ -194,11 +184,46 @@ const htmlContent = `
       </script>
     </body>
   </html>
-`
-</script>
+`);
+
+// Clear content when needed
+clearShadowRoot(shadowRoot);
 ```
 
-### Composable Usage
+### Usage with React
+
+```tsx
+import { useEffect, useRef } from 'react';
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
+
+function HtmlRenderer({ html }: { html: string }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const shadowRootRef = useRef<ShadowRoot | null>(null);
+
+  useEffect(() => {
+    if (!hostRef.current) return;
+
+    // Attach shadow root on mount
+    if (!shadowRootRef.current) {
+      shadowRootRef.current = hostRef.current.attachShadow({ mode: 'open' });
+    }
+
+    // Render HTML
+    renderIntoShadowRoot(shadowRootRef.current, html);
+
+    // Cleanup on unmount
+    return () => {
+      if (shadowRootRef.current) {
+        clearShadowRoot(shadowRootRef.current);
+      }
+    };
+  }, [html]);
+
+  return <div ref={hostRef} />;
+}
+```
+
+### Usage with Vue
 
 ```vue
 <template>
@@ -206,102 +231,132 @@ const htmlContent = `
 </template>
 
 <script setup lang="ts">
-import { useHtmlRenderer } from '@/components/htmlRenderer/composables/useHtmlRenderer'
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
 
-const { hostRef, clear, shadowRoot } = useHtmlRenderer({
-  html: '<div>Content</div>',
-})
+const props = defineProps<{ html: string }>();
 
-// Manually clear content if needed
-// clear();
+const hostRef = ref<HTMLElement>();
+let shadowRoot: ShadowRoot | null = null;
+
+onMounted(async () => {
+  if (!hostRef.value) return;
+  
+  shadowRoot = hostRef.value.attachShadow({ mode: 'open' });
+  await renderIntoShadowRoot(shadowRoot, props.html);
+});
+
+onBeforeUnmount(() => {
+  if (shadowRoot) {
+    clearShadowRoot(shadowRoot);
+  }
+});
 </script>
 ```
 
-#### Async font loading: `@import` and external `<link rel="stylesheet">`
+### Usage with Angular
 
-Font rules referenced via CSS `@import` are fetched asynchronously and recursively resolved. In addition, external stylesheets linked with `<link rel="stylesheet" href="…">` inside the provided HTML are fetched and scanned for `@font-face` declarations as well. Relative `url()` sources in collected font rules are rebased to absolute URLs based on the stylesheet URL.
+```typescript
+import { Component, ElementRef, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
 
-When you use the `HtmlRenderer` component or the `useHtmlRenderer` composable, this is handled automatically. If you directly call the lower-level renderer, remember it is async:
-
-```ts
-import { renderIntoShadowRoot } from './src/renderers/shadowRenderer'
-
-const host = document.createElement('div')
-const shadow = host.attachShadow({ mode: 'open' })
-await renderIntoShadowRoot(shadow, '<html><head><style>@import url("https://cdn.example.com/fonts.css");</style></head><body>Hi</body></html>')
-```
-
-You can also rely on linked stylesheets in the HTML you render:
-
-```html
-<!doctype html>
-<html>
-  <head>
-    <link rel="stylesheet" href="https://cdn.example.com/site-styles.css" />
-  </head>
-  <body>Content</body>
+@Component({
+  selector: 'app-html-renderer',
+  template: '<div #host></div>'
+})
+export class HtmlRendererComponent implements OnInit, OnDestroy {
+  @Input() html: string = '';
+  @ViewChild('host', { static: true }) hostRef!: ElementRef<HTMLDivElement>;
   
-</html>
+  private shadowRoot: ShadowRoot | null = null;
+
+  async ngOnInit() {
+    this.shadowRoot = this.hostRef.nativeElement.attachShadow({ mode: 'open' });
+    await renderIntoShadowRoot(this.shadowRoot, this.html);
+  }
+
+  ngOnDestroy() {
+    if (this.shadowRoot) {
+      clearShadowRoot(this.shadowRoot);
+    }
+  }
+}
 ```
 
-Notes and caveats:
-- External fetches must comply with CORS. If the remote server doesn’t allow cross-origin requests, stylesheets/fonts may not be retrievable by the extractor.
-- Media queries on `<link media="…">` are respected; links that don’t match the current environment are skipped.
-- Alternate stylesheets (`rel` containing `alternate`) and disabled links are skipped.
+### Direct Rendering (Without Shadow DOM)
+
+If you don't need style isolation, you can use direct rendering:
+
+```typescript
+import { renderDirectly, clearElement } from 'shadow-html-renderer';
+
+const container = document.getElementById('content');
+
+// Render HTML directly into element
+await renderDirectly(container, '<div><h1>Hello</h1><script>console.log("Hi")</script></div>');
+
+// Clear when needed
+clearElement(container);
+```
 
 ---
 
 ## 📚 API Reference
 
-### Component: `HtmlRenderer`
+### Shadow Renderer
 
-#### Props
+#### `renderIntoShadowRoot(shadowRoot, html)`
 
-| Prop   | Type     | Required | Default | Description               |
-| ------ | -------- | -------- | ------- | ------------------------- |
-| `html` | `string` | Yes      | -       | The HTML string to render |
+Renders HTML content into a Shadow Root with style isolation and script execution.
 
-#### Example
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `shadowRoot` | `ShadowRoot` | The shadow root to render into |
+| `html` | `string` | The HTML string to render |
 
-```vue
-<HtmlRenderer :html="myHtmlString" />
-```
+Returns: `Promise<void>`
 
----
+#### `clearShadowRoot(shadowRoot)`
 
-### Composable: `useHtmlRenderer`
+Clears all content from a shadow root.
 
-#### Parameters
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `shadowRoot` | `ShadowRoot` | The shadow root to clear |
 
-```typescript
-interface IHtmlRendererOptions {
-  html: string // The HTML string to render
-}
-```
+#### `extractAndInjectFontFaces(doc, styleElementId?)`
 
-#### Returns
+Extracts @font-face rules from a document and injects them into the main document.
 
-```typescript
-interface IHtmlRendererComposable {
-  hostRef: Ref<HTMLElement | undefined> // Template ref for the host element
-  clear: () => void // Function to clear rendered content
-  shadowRoot: Ref<ShadowRoot | undefined> // Shadow root ref
-}
-```
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `doc` | `Document` | - | The parsed document containing style elements |
+| `styleElementId` | `string` | `"shadow-dom-fonts"` | ID for the injected style element |
 
-#### Example
+Returns: `Promise<void>`
 
-```typescript
-const { hostRef, clear, shadowRoot } = useHtmlRenderer({
-  html: '<div>Content</div>',
-})
-```
+### Direct Renderer
 
----
+#### `renderDirectly(target, html)`
+
+Renders HTML content directly into an element with script execution but without style isolation.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `target` | `HTMLElement` | The target element to render into |
+| `html` | `string` | The HTML string to render |
+
+Returns: `Promise<void>`
+
+#### `clearElement(target)`
+
+Clears all children from a target element.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `target` | `HTMLElement` | The element to clear |
 
 ### Utility Functions
-
-#### From `utils.ts`
 
 ```typescript
 // Generate a unique ID
@@ -317,17 +372,28 @@ function normalizeAttr(val: string): string
 function findPlaceholderNode(root: ParentNode, id: string): Comment | null
 ```
 
----
-
 ### Type Definitions
 
-See `types.ts` for complete type definitions:
+```typescript
+interface IHtmlRendererOptions {
+  html: string;
+}
 
-- `IHtmlRendererOptions`
-- `IHtmlRendererComposable`
-- `IHtmlRendererProps`
-- `IScriptMeta`
-- `IFontFaceExtractionOptions`
+interface IScriptMeta {
+  id: string;
+  attrs: Record<string, string>;
+  code: string | null;
+  hasSrc: boolean;
+  isAsync: boolean;
+  isDefer: boolean;
+  isModule: boolean;
+}
+
+interface IFontFaceExtractionOptions {
+  styleElementId?: string;
+  preventDuplicates?: boolean;
+}
+```
 
 ---
 
@@ -335,15 +401,14 @@ See `types.ts` for complete type definitions:
 
 ### Example 1: Rendering a Styled Coupon
 
-```vue
-<template>
-  <HtmlRenderer :html="couponHtml" />
-</template>
+```typescript
+import { renderIntoShadowRoot } from 'shadow-html-renderer';
 
-<script setup lang="ts">
-import HtmlRenderer from '@/components/htmlRenderer/HtmlRenderer.vue'
+const host = document.createElement('div');
+document.body.appendChild(host);
+const shadowRoot = host.attachShadow({ mode: 'open' });
 
-const couponHtml = `
+await renderIntoShadowRoot(shadowRoot, `
   <!doctype html>
   <html>
     <head>
@@ -370,21 +435,19 @@ const couponHtml = `
       <p>Valid until: 2025-12-31</p>
     </body>
   </html>
-`
-</script>
+`);
 ```
 
 ### Example 2: Interactive Widget with Scripts
 
-```vue
-<template>
-  <HtmlRenderer :html="widgetHtml" />
-</template>
+```typescript
+import { renderIntoShadowRoot } from 'shadow-html-renderer';
 
-<script setup lang="ts">
-import HtmlRenderer from '@/components/htmlRenderer/HtmlRenderer.vue';
+const host = document.createElement('div');
+document.body.appendChild(host);
+const shadowRoot = host.attachShadow({ mode: 'open' });
 
-const widgetHtml = `
+await renderIntoShadowRoot(shadowRoot, `
   <div id="widget">
     <button id="clickMe">Click Me</button>
     <span id="counter">0</span>
@@ -396,27 +459,26 @@ const widgetHtml = `
       document.getElementById('counter').textContent = count;
     });
   </script>
-`;
-</script>
+`);
 ```
 
 ### Example 3: Loading External Scripts
 
-```vue
-<template>
-  <HtmlRenderer :html="scriptHtml" />
-</template>
+```typescript
+import { renderIntoShadowRoot } from 'shadow-html-renderer';
 
-<script setup lang="ts">
-const scriptHtml = `
+const host = document.createElement('div');
+document.body.appendChild(host);
+const shadowRoot = host.attachShadow({ mode: 'open' });
+
+await renderIntoShadowRoot(shadowRoot, `
   <div id="map"></div>
   <script src="https://cdn.example.com/map-library.js" defer></script>
   <script defer>
     // This runs after map-library.js loads
     initMap('map');
   </script>
-`;
-</script>
+`);
 ```
 
 ---
@@ -432,10 +494,9 @@ const scriptHtml = `
 
 ### Performance
 
-1. **Avoid re-rendering** - The component renders once on mount
-2. **Use keys** if you need to force re-rendering with different content
-3. **Minimize HTML size** for faster parsing
-4. **Consider lazy loading** for heavy content
+1. **Avoid re-rendering** - The renderer is optimized for single renders
+2. **Minimize HTML size** for faster parsing
+3. **Consider lazy loading** for heavy content
 
 ### Styling
 
@@ -472,15 +533,13 @@ if (condition) {
 // if (condition) doSomething()
 ```
 
-Note: The library code has been updated to follow this guideline everywhere.
-
 ---
 
 ## 🤝 Contributing
 
 When contributing to this library, please follow these guidelines:
 
-1. **Maintain separation of concerns**: Keep renderers, composables, and utilities separate
+1. **Maintain separation of concerns**: Keep renderers and utilities separate
 2. **Document everything**: All functions, types, and modules should have JSDoc comments
 3. **Write tests**: Add tests for new features or bug fixes
 4. **Follow TypeScript best practices**: Use strict typing, avoid `any`
@@ -490,14 +549,14 @@ When contributing to this library, please follow these guidelines:
 
 ## 📄 License
 
-Free to use.
+MIT License - Free to use.
 
 ---
 
 ## 🙏 Acknowledgments
 
-This library was built to solve real-world challenges in rendering dynamic HTML content in Vue applications (Vue 2.7+ and Vue 3), specifically for rendering formatted documents like coupons and vouchers with proper style isolation and font loading.
+This library was built to solve real-world challenges in rendering dynamic HTML content in JavaScript applications, specifically for rendering formatted documents like coupons and vouchers with proper style isolation and font loading.
 
 ---
 
-**Built with ❤️ for Vue developers (Vue 2.7+ and Vue 3) who need powerful HTML rendering capabilities.**
+**Built with ❤️ for developers who need powerful, framework-agnostic HTML rendering capabilities.**

@@ -1,36 +1,36 @@
 {
-  "name": "vue-html-renderer",
-  "version": "1.1.0",
-  "description": "A powerful and flexible Vue library for rendering arbitrary HTML content with two distinct rendering modes: Direct Mode (with script execution) and Shadow Mode (with style isolation)",
+  "name": "shadow-html-renderer",
+  "version": "1.0.0-beta",
+  "description": "A powerful and flexible framework-agnostic library for rendering HTML content into Shadow DOM with style isolation and full script execution support",
   "keywords": [
-    "vue",
-    "vue3",
     "html",
     "renderer",
     "shadow-dom",
     "html-rendering",
-    "component",
-    "typescript"
+    "typescript",
+    "vanilla-js",
+    "framework-agnostic",
+    "script-execution",
+    "style-isolation"
   ],
-  "homepage": "https://github.com/ddavid93/vue-html-renderer#readme",
+  "homepage": "https://github.com/ddavid93/shadow-html-renderer#readme",
   "bugs": {
-    "url": "https://github.com/ddavid93/vue-html-renderer/issues"
+    "url": "https://github.com/ddavid93/shadow-html-renderer/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ddavid93/vue-html-renderer.git"
+    "url": "git+https://github.com/ddavid93/shadow-html-renderer.git"
   },
   "license": "MIT",
   "author": "Daniel David Díaz González <ddavid930826@gmail.com>",
   "type": "module",
-  "module": "./dist/vue-html-renderer.js",
+  "module": "./dist/shadow-html-renderer.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/vue-html-renderer.js"
-    },
-    "./dist/style.css": "./dist/style.css"
+      "import": "./dist/shadow-html-renderer.js"
+    }
   },
   "files": [
     "dist",
@@ -50,26 +50,18 @@
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "preview": "vite preview",
     "test:unit": "vitest",
-    "type-check": "vue-tsc --build --force",
+    "type-check": "tsc --build --force",
     "update-packages": "pnpm upgrade --latest"
-  },
-  "dependencies": {
-    "vue": "3.5.25"
   },
   "devDependencies": {
     "@prettier/plugin-oxc": "0.0.5",
     "@tsconfig/node22": "22.0.5",
     "@types/jsdom": "27.0.0",
     "@types/node": "24.10.1",
-    "@vitejs/plugin-vue": "6.0.2",
     "@vitest/eslint-plugin": "1.5.0",
-    "@vue/eslint-config-prettier": "10.2.0",
-    "@vue/eslint-config-typescript": "14.6.0",
-    "@vue/test-utils": "2.4.6",
-    "@vue/tsconfig": "0.8.1",
     "eslint": "9.39.1",
     "eslint-plugin-oxlint": "1.30.0",
-    "eslint-plugin-vue": "10.6.0",
+    "typescript-eslint": "8.33.0",
     "jiti": "2.6.1",
     "jsdom": "27.2.0",
     "npm-run-all2": "8.0.4",
@@ -78,8 +70,7 @@
     "typescript": "5.8.2",
     "vite": "npm:rolldown-vite@7.2.7",
     "vite-plugin-dts": "4.5.4",
-    "vitest": "4.0.14",
-    "vue-tsc": "3.1.5"
+    "vitest": "4.0.14"
   },
   "browserslist": [
     "> 1%",

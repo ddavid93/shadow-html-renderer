@@ -1,49 +1,101 @@
 /**
- * VueHTMLRenderer Library - Main Entry Point
+ * Shadow HTML Renderer Library - Main Entry Point
  *
- * This library provides a Vue component for rendering HTML content with two modes:
- * - Direct Mode: with script execution
- * - Shadow Mode: with style isolation
+ * A framework-agnostic library for rendering HTML content into Shadow DOM
+ * with style isolation and full script execution support.
+ *
+ * This library can be used with any JavaScript framework (React, Vue, Angular, Svelte, etc.)
+ * or vanilla JavaScript.
  *
  * @example
  * ```typescript
- * // Import the component
- * import App from 'vue-html-renderer';
- * // or
- * import { App } from 'vue-html-renderer';
+ * // Import the renderer function
+ * import { renderIntoShadowRoot } from 'shadow-html-renderer';
  *
- * // Import types for TypeScript
- * import type { IHtmlRendererProps } from 'vue-html-renderer';
+ * // Create a host element and attach shadow root
+ * const host = document.createElement('div');
+ * document.body.appendChild(host);
+ * const shadowRoot = host.attachShadow({ mode: 'open' });
+ *
+ * // Render HTML into the shadow root
+ * await renderIntoShadowRoot(shadowRoot, '<div>Hello World</div>');
  * ```
  *
- * @module VueHTMLRenderer
+ * @module ShadowHTMLRenderer
  */
 
 // ============================================================================
-// COMPONENT EXPORTS
+// RENDERER EXPORTS
 // ============================================================================
 
 /**
- * The main App component for rendering HTML content.
- *
- * This is the default export, so you can import it as:
- * ```typescript
- * import App from 'vue-html-renderer';
- * ```
+ * Shadow DOM renderer functions for rendering HTML with style isolation
+ * and full script execution support.
  */
-export { default } from './App.vue'
-export { default as App } from './App.vue'
+export {
+  renderIntoShadowRoot,
+  clearShadowRoot,
+  extractAndInjectFontFaces,
+} from './renderers/shadowRenderer'
+
+/**
+ * Direct DOM renderer functions for rendering HTML with script execution
+ * but without style isolation.
+ */
+export {
+  renderDirectly,
+  clearElement,
+  extractScriptsWithPlaceholders,
+  createExecutableScript,
+  insertScriptAtPlaceholder,
+} from './renderers/directRenderer'
+
+// ============================================================================
+// UTILITY EXPORTS
+// ============================================================================
+
+/**
+ * Utility functions for HTML and attribute normalization.
+ */
+export {
+  uid,
+  normalizeHtml,
+  normalizeAttr,
+  findPlaceholderNode,
+} from './extras/utils'
+
+/**
+ * CSS utility functions for font-face handling.
+ */
+export {
+  stripComments,
+  extractFontFaceBlocks,
+  createImportRegex,
+  resolveUrl,
+  rebaseUrls,
+  getDocBaseUrl,
+} from './styles/cssUtils'
+
+/**
+ * Font-face collection and injection utilities.
+ */
+export { collectFontFaceRulesFromDocument } from './styles/fontFaceCollector'
+export { injectFontFaces } from './styles/fontInjector'
 
 // ============================================================================
 // TYPE EXPORTS
 // ============================================================================
 
 /**
- * TypeScript type definitions for the component props.
+ * TypeScript type definitions.
  *
  * Import these for type-safe usage:
  * ```typescript
- * import type { IHtmlRendererProps } from 'vue-html-renderer';
+ * import type { IScriptMeta, IHtmlRendererOptions } from 'shadow-html-renderer';
  * ```
  */
-export type { IHtmlRendererProps } from './extras/types'
+export type {
+  IScriptMeta,
+  IHtmlRendererOptions,
+  IFontFaceExtractionOptions,
+} from './extras/types'

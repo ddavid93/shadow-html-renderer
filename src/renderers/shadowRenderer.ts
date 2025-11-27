@@ -13,7 +13,6 @@
  * @module shadowRenderer
  */
 
-import { nextTick } from 'vue'
 import { normalizeHtml } from '../extras/utils'
 import { collectFontFaceRulesFromDocument } from '../styles/fontFaceCollector'
 import { injectFontFaces } from '../styles/fontInjector'
@@ -128,8 +127,8 @@ export async function renderIntoShadowRoot(shadowRoot: ShadowRoot, html: string)
     void insertScriptAtPlaceholder(shadowRoot, m)
   }
 
-  // 3) After Vue DOM flush, run defer scripts in-order
-  await nextTick()
+  // 3) After DOM flush (microtask), run defer scripts in-order
+  await Promise.resolve()
   for (const m of deferScripts) {
     await insertScriptAtPlaceholder(shadowRoot, m)
   }
