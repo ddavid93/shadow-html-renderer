@@ -4,7 +4,10 @@
  * - Creates (or reuses) a <style id="shadow-dom-fonts"> element
  * - Deduplicates against existing content to avoid repeated rules
  */
-export function injectFontFaces(rules: Iterable<string>, styleElementId = 'shadow-dom-fonts'): void {
+export function injectFontFaces(
+  rules: Iterable<string>,
+  styleElementId = 'shadow-dom-fonts',
+): void {
   // Assemble rules to append, checking against existing content
   let styleEl = document.getElementById(styleElementId) as HTMLStyleElement | null
   if (!styleEl) {

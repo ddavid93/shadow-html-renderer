@@ -57,12 +57,7 @@ export {
 /**
  * Utility functions for HTML and attribute normalization.
  */
-export {
-  uid,
-  normalizeHtml,
-  normalizeAttr,
-  findPlaceholderNode,
-} from './extras/utils'
+export { uid, normalizeHtml, normalizeAttr, findPlaceholderNode } from './extras/utils'
 
 /**
  * CSS utility functions for font-face handling.
@@ -94,8 +89,4 @@ export { injectFontFaces } from './styles/fontInjector'
  * import type { IScriptMeta, IHtmlRendererOptions } from 'shadow-html-renderer';
  * ```
  */
-export type {
-  IScriptMeta,
-  IHtmlRendererOptions,
-  IFontFaceExtractionOptions,
-} from './extras/types'
+export type { IScriptMeta, IHtmlRendererOptions, IFontFaceExtractionOptions } from './extras/types'

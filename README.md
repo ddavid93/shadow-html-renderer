@@ -157,17 +157,19 @@ pnpm add shadow-html-renderer
 ### Basic Usage (Vanilla JavaScript)
 
 ```typescript
-import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer'
 
 // Create a host element
-const host = document.createElement('div');
-document.body.appendChild(host);
+const host = document.createElement('div')
+document.body.appendChild(host)
 
 // Attach shadow root
-const shadowRoot = host.attachShadow({ mode: 'open' });
+const shadowRoot = host.attachShadow({ mode: 'open' })
 
 // Render HTML into shadow root
-await renderIntoShadowRoot(shadowRoot, `
+await renderIntoShadowRoot(
+  shadowRoot,
+  `
   <!doctype html>
   <html>
     <head>
@@ -184,42 +186,43 @@ await renderIntoShadowRoot(shadowRoot, `
       </script>
     </body>
   </html>
-`);
+`,
+)
 
 // Clear content when needed
-clearShadowRoot(shadowRoot);
+clearShadowRoot(shadowRoot)
 ```
 
 ### Usage with React
 
 ```tsx
-import { useEffect, useRef } from 'react';
-import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
+import { useEffect, useRef } from 'react'
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer'
 
 function HtmlRenderer({ html }: { html: string }) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const shadowRootRef = useRef<ShadowRoot | null>(null);
+  const hostRef = useRef<HTMLDivElement>(null)
+  const shadowRootRef = useRef<ShadowRoot | null>(null)
 
   useEffect(() => {
-    if (!hostRef.current) return;
+    if (!hostRef.current) return
 
     // Attach shadow root on mount
     if (!shadowRootRef.current) {
-      shadowRootRef.current = hostRef.current.attachShadow({ mode: 'open' });
+      shadowRootRef.current = hostRef.current.attachShadow({ mode: 'open' })
     }
 
     // Render HTML
-    renderIntoShadowRoot(shadowRootRef.current, html);
+    renderIntoShadowRoot(shadowRootRef.current, html)
 
     // Cleanup on unmount
     return () => {
       if (shadowRootRef.current) {
-        clearShadowRoot(shadowRootRef.current);
+        clearShadowRoot(shadowRootRef.current)
       }
-    };
-  }, [html]);
+    }
+  }, [html])
 
-  return <div ref={hostRef} />;
+  return <div ref={hostRef} />
 }
 ```
 
@@ -231,53 +234,53 @@ function HtmlRenderer({ html }: { html: string }) {
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer'
 
-const props = defineProps<{ html: string }>();
+const props = defineProps<{ html: string }>()
 
-const hostRef = ref<HTMLElement>();
-let shadowRoot: ShadowRoot | null = null;
+const hostRef = ref<HTMLElement>()
+let shadowRoot: ShadowRoot | null = null
 
 onMounted(async () => {
-  if (!hostRef.value) return;
-  
-  shadowRoot = hostRef.value.attachShadow({ mode: 'open' });
-  await renderIntoShadowRoot(shadowRoot, props.html);
-});
+  if (!hostRef.value) return
+
+  shadowRoot = hostRef.value.attachShadow({ mode: 'open' })
+  await renderIntoShadowRoot(shadowRoot, props.html)
+})
 
 onBeforeUnmount(() => {
   if (shadowRoot) {
-    clearShadowRoot(shadowRoot);
+    clearShadowRoot(shadowRoot)
   }
-});
+})
 </script>
 ```
 
 ### Usage with Angular
 
 ```typescript
-import { Component, ElementRef, Input, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer';
+import { Component, ElementRef, Input, OnInit, OnDestroy, ViewChild } from '@angular/core'
+import { renderIntoShadowRoot, clearShadowRoot } from 'shadow-html-renderer'
 
 @Component({
   selector: 'app-html-renderer',
-  template: '<div #host></div>'
+  template: '<div #host></div>',
 })
 export class HtmlRendererComponent implements OnInit, OnDestroy {
-  @Input() html: string = '';
-  @ViewChild('host', { static: true }) hostRef!: ElementRef<HTMLDivElement>;
-  
-  private shadowRoot: ShadowRoot | null = null;
+  @Input() html: string = ''
+  @ViewChild('host', { static: true }) hostRef!: ElementRef<HTMLDivElement>
+
+  private shadowRoot: ShadowRoot | null = null
 
   async ngOnInit() {
-    this.shadowRoot = this.hostRef.nativeElement.attachShadow({ mode: 'open' });
-    await renderIntoShadowRoot(this.shadowRoot, this.html);
+    this.shadowRoot = this.hostRef.nativeElement.attachShadow({ mode: 'open' })
+    await renderIntoShadowRoot(this.shadowRoot, this.html)
   }
 
   ngOnDestroy() {
     if (this.shadowRoot) {
-      clearShadowRoot(this.shadowRoot);
+      clearShadowRoot(this.shadowRoot)
     }
   }
 }
@@ -288,15 +291,15 @@ export class HtmlRendererComponent implements OnInit, OnDestroy {
 If you don't need style isolation, you can use direct rendering:
 
 ```typescript
-import { renderDirectly, clearElement } from 'shadow-html-renderer';
+import { renderDirectly, clearElement } from 'shadow-html-renderer'
 
-const container = document.getElementById('content');
+const container = document.getElementById('content')
 
 // Render HTML directly into element
-await renderDirectly(container, '<div><h1>Hello</h1><script>console.log("Hi")</script></div>');
+await renderDirectly(container, '<div><h1>Hello</h1><script>console.log("Hi")</script></div>')
 
 // Clear when needed
-clearElement(container);
+clearElement(container)
 ```
 
 ---
@@ -309,10 +312,10 @@ clearElement(container);
 
 Renders HTML content into a Shadow Root with style isolation and script execution.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type         | Description                    |
+| ------------ | ------------ | ------------------------------ |
 | `shadowRoot` | `ShadowRoot` | The shadow root to render into |
-| `html` | `string` | The HTML string to render |
+| `html`       | `string`     | The HTML string to render      |
 
 Returns: `Promise<void>`
 
@@ -320,18 +323,18 @@ Returns: `Promise<void>`
 
 Clears all content from a shadow root.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type         | Description              |
+| ------------ | ------------ | ------------------------ |
 | `shadowRoot` | `ShadowRoot` | The shadow root to clear |
 
 #### `extractAndInjectFontFaces(doc, styleElementId?)`
 
 Extracts @font-face rules from a document and injects them into the main document.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `doc` | `Document` | - | The parsed document containing style elements |
-| `styleElementId` | `string` | `"shadow-dom-fonts"` | ID for the injected style element |
+| Parameter        | Type       | Default              | Description                                   |
+| ---------------- | ---------- | -------------------- | --------------------------------------------- |
+| `doc`            | `Document` | -                    | The parsed document containing style elements |
+| `styleElementId` | `string`   | `"shadow-dom-fonts"` | ID for the injected style element             |
 
 Returns: `Promise<void>`
 
@@ -341,10 +344,10 @@ Returns: `Promise<void>`
 
 Renders HTML content directly into an element with script execution but without style isolation.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `target` | `HTMLElement` | The target element to render into |
-| `html` | `string` | The HTML string to render |
+| Parameter | Type          | Description                       |
+| --------- | ------------- | --------------------------------- |
+| `target`  | `HTMLElement` | The target element to render into |
+| `html`    | `string`      | The HTML string to render         |
 
 Returns: `Promise<void>`
 
@@ -352,9 +355,9 @@ Returns: `Promise<void>`
 
 Clears all children from a target element.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `target` | `HTMLElement` | The element to clear |
+| Parameter | Type          | Description          |
+| --------- | ------------- | -------------------- |
+| `target`  | `HTMLElement` | The element to clear |
 
 ### Utility Functions
 
@@ -376,22 +379,22 @@ function findPlaceholderNode(root: ParentNode, id: string): Comment | null
 
 ```typescript
 interface IHtmlRendererOptions {
-  html: string;
+  html: string
 }
 
 interface IScriptMeta {
-  id: string;
-  attrs: Record<string, string>;
-  code: string | null;
-  hasSrc: boolean;
-  isAsync: boolean;
-  isDefer: boolean;
-  isModule: boolean;
+  id: string
+  attrs: Record<string, string>
+  code: string | null
+  hasSrc: boolean
+  isAsync: boolean
+  isDefer: boolean
+  isModule: boolean
 }
 
 interface IFontFaceExtractionOptions {
-  styleElementId?: string;
-  preventDuplicates?: boolean;
+  styleElementId?: string
+  preventDuplicates?: boolean
 }
 ```
 
@@ -402,13 +405,15 @@ interface IFontFaceExtractionOptions {
 ### Example 1: Rendering a Styled Coupon
 
 ```typescript
-import { renderIntoShadowRoot } from 'shadow-html-renderer';
+import { renderIntoShadowRoot } from 'shadow-html-renderer'
 
-const host = document.createElement('div');
-document.body.appendChild(host);
-const shadowRoot = host.attachShadow({ mode: 'open' });
+const host = document.createElement('div')
+document.body.appendChild(host)
+const shadowRoot = host.attachShadow({ mode: 'open' })
 
-await renderIntoShadowRoot(shadowRoot, `
+await renderIntoShadowRoot(
+  shadowRoot,
+  `
   <!doctype html>
   <html>
     <head>
@@ -435,19 +440,22 @@ await renderIntoShadowRoot(shadowRoot, `
       <p>Valid until: 2025-12-31</p>
     </body>
   </html>
-`);
+`,
+)
 ```
 
 ### Example 2: Interactive Widget with Scripts
 
 ```typescript
-import { renderIntoShadowRoot } from 'shadow-html-renderer';
+import { renderIntoShadowRoot } from 'shadow-html-renderer'
 
-const host = document.createElement('div');
-document.body.appendChild(host);
-const shadowRoot = host.attachShadow({ mode: 'open' });
+const host = document.createElement('div')
+document.body.appendChild(host)
+const shadowRoot = host.attachShadow({ mode: 'open' })
 
-await renderIntoShadowRoot(shadowRoot, `
+await renderIntoShadowRoot(
+  shadowRoot,
+  `
   <div id="widget">
     <button id="clickMe">Click Me</button>
     <span id="counter">0</span>
@@ -459,26 +467,30 @@ await renderIntoShadowRoot(shadowRoot, `
       document.getElementById('counter').textContent = count;
     });
   </script>
-`);
+`,
+)
 ```
 
 ### Example 3: Loading External Scripts
 
 ```typescript
-import { renderIntoShadowRoot } from 'shadow-html-renderer';
+import { renderIntoShadowRoot } from 'shadow-html-renderer'
 
-const host = document.createElement('div');
-document.body.appendChild(host);
-const shadowRoot = host.attachShadow({ mode: 'open' });
+const host = document.createElement('div')
+document.body.appendChild(host)
+const shadowRoot = host.attachShadow({ mode: 'open' })
 
-await renderIntoShadowRoot(shadowRoot, `
+await renderIntoShadowRoot(
+  shadowRoot,
+  `
   <div id="map"></div>
   <script src="https://cdn.example.com/map-library.js" defer></script>
   <script defer>
     // This runs after map-library.js loads
     initMap('map');
   </script>
-`);
+`,
+)
 ```
 
 ---
@@ -519,7 +531,6 @@ await renderIntoShadowRoot(shadowRoot, `
 To ensure readability and prevent subtle bugs, this project mandates using braces on all control statements.
 
 - Always use braces for `if`, `else`, `else if`, `for`, `while`, and `do...while` blocks — even for single statements.
-- This rule is enforced via ESLint: `curly: ['error', 'all']`.
 
 Example:
 

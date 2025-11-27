@@ -16,10 +16,7 @@
 import { normalizeHtml } from '../extras/utils'
 import { collectFontFaceRulesFromDocument } from '../styles/fontFaceCollector'
 import { injectFontFaces } from '../styles/fontInjector'
-import {
-  extractScriptsWithPlaceholders,
-  insertScriptAtPlaceholder,
-} from './directRenderer'
+import { extractScriptsWithPlaceholders, insertScriptAtPlaceholder } from './directRenderer'
 import type { IScriptMeta } from '../extras/types'
 
 /**

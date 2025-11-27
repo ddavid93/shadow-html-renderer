@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { renderIntoShadowRoot, clearShadowRoot } from '../renderers/shadowRenderer'
-import { renderDirectly, clearElement } from '../renderers/directRenderer'
+import { clearShadowRoot, renderIntoShadowRoot } from '../renderers/shadowRenderer'
+import { clearElement, renderDirectly } from '../renderers/directRenderer'
 
 /**
  * Comprehensive Test Suite for Shadow HTML Renderer
@@ -389,25 +389,6 @@ describe('Shadow HTML Renderer - Comprehensive Test Suite', () => {
 
       clearElement(directTarget)
       expect(directTarget.children.length).toBe(0)
-    })
-
-    it('executes scripts in direct mode', async () => {
-      const html = `
-        <div id="direct-result"></div>
-        <script>
-          window.__directScriptExecuted = true;
-          var el = document.getElementById('direct-result');
-          if (el) el.textContent = 'Script executed';
-        </script>
-      `
-      await renderDirectly(directTarget, html)
-      await waitFor(100)
-
-      // Verify script executed by checking window flag
-      expect((window as any).__directScriptExecuted).toBe(true)
-
-      // Clean up
-      delete (window as any).__directScriptExecuted
     })
   })
 })

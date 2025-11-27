@@ -1,4 +1,11 @@
-import { createImportRegex, extractFontFaceBlocks, getDocBaseUrl, rebaseUrls, resolveUrl, stripComments } from './cssUtils'
+import {
+  createImportRegex,
+  extractFontFaceBlocks,
+  getDocBaseUrl,
+  rebaseUrls,
+  resolveUrl,
+  stripComments,
+} from './cssUtils'
 
 /**
  * Collect @font-face rules from a parsed HTML Document.
@@ -61,7 +68,7 @@ export async function collectFontFaceRulesFromDocument(doc: Document): Promise<S
   // External stylesheets via <link>
   try {
     const linkNodes = doc.querySelectorAll(
-      'link[rel~="stylesheet"][href], link[rel="preload"][as="style"][href]'
+      'link[rel~="stylesheet"][href], link[rel="preload"][as="style"][href]',
     )
     for (const linkEl of Array.from(linkNodes)) {
       const rel = (linkEl.getAttribute('rel') || '').toLowerCase()
