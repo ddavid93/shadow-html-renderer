@@ -1,9 +1,9 @@
 # VueHTMLRenderer
 
-A powerful and flexible Vue library for rendering arbitrary HTML content with two distinct rendering modes: **Direct Mode** (with script execution) and **Shadow Mode** (with style isolation). Compatible with Vue 2.7+ and Vue 3.
+A powerful and flexible Vue library for rendering arbitrary HTML content using Shadow DOM with complete style isolation and full script execution support. Compatible with Vue 2.7+ and Vue 3.
 
 > **⚠️ SECURITY WARNING**  
-> **This library does NOT sanitize or validate HTML content. If you render HTML containing malicious scripts in Direct Mode, those scripts WILL execute. Always sanitize untrusted HTML content before passing it to this component, or use Shadow Mode (which disables script execution) when rendering content from untrusted sources.**
+> **This library does NOT sanitize or validate HTML content. If you render HTML containing malicious scripts, those scripts WILL execute. Always sanitize untrusted HTML content before passing it to this component.**
 
 ## 📋 Table of Contents
 
@@ -75,26 +75,12 @@ You might wonder: "Why not just use an `<iframe>`?" Here are the key reasons:
 
 ## ✨ Features
 
-### Direct Mode (isShadow=false)
-
-- ✅ Full script execution support
-- ✅ Async, defer, and sequential script handling
-- ✅ Module script support (`type="module"`)
-- ✅ Inline and external scripts
-- ✅ Browser-like execution semantics
-- ✅ No style isolation (uses parent styles)
-
-### Shadow Mode (isShadow=true)
-
 - ✅ Complete style isolation using Shadow DOM
+- ✅ Full script execution support (async, defer, sequential, module)
 - ✅ Preserves full HTML structure (`<html>`, `<head>`, `<body>`)
 - ✅ Automatic @font-face extraction and injection
-- ✅ No script execution (by design, for security)
-- ✅ Perfect for rendering formatted documents
+- ✅ Browser-like script execution semantics
 - ✅ CSS encapsulation (no style leakage)
-
-### Common Features
-
 - ✅ Vue Composition API (Vue 2.7+ and Vue 3)
 - ✅ Full TypeScript support
 - ✅ Comprehensive documentation
@@ -183,32 +169,9 @@ yarn add @your-org/html-renderer
 
 ### Basic Component Usage
 
-#### Direct Mode (with script execution)
-
 ```vue
 <template>
   <HtmlRenderer :html="htmlContent" />
-</template>
-
-<script setup lang="ts">
-import HtmlRenderer from '@/components/htmlRenderer/HtmlRenderer.vue';
-
-const htmlContent = `
-  <div>
-    <h1>Hello World</h1>
-    <script>
-      console.log('This script will execute!');
-    </script>
-  </div>
-`;
-</script>
-```
-
-#### Shadow Mode (with style isolation)
-
-```vue
-<template>
-  <HtmlRenderer :html="htmlContent" :is-shadow="true" />
 </template>
 
 <script setup lang="ts">
@@ -224,8 +187,11 @@ const htmlContent = `
       </style>
     </head>
     <body>
-      <h1>Isolated Styles</h1>
-      <p>These styles won't affect the parent document!</p>
+      <h1>Hello World</h1>
+      <p>Styles are isolated and won't affect the parent document!</p>
+      <script>
+        console.log('Scripts execute with full support!');
+      </script>
     </body>
   </html>
 `
@@ -242,9 +208,8 @@ const htmlContent = `
 <script setup lang="ts">
 import { useHtmlRenderer } from '@/components/htmlRenderer/composables/useHtmlRenderer'
 
-const { hostRef, clear } = useHtmlRenderer({
+const { hostRef, clear, shadowRoot } = useHtmlRenderer({
   html: '<div>Content</div>',
-  isShadow: false,
 })
 
 // Manually clear content if needed
@@ -292,15 +257,14 @@ Notes and caveats:
 
 #### Props
 
-| Prop       | Type      | Required | Default | Description                    |
-| ---------- | --------- | -------- | ------- | ------------------------------ |
-| `html`     | `string`  | Yes      | -       | The HTML string to render      |
-| `isShadow` | `boolean` | No       | `false` | Whether to use Shadow DOM mode |
+| Prop   | Type     | Required | Default | Description               |
+| ------ | -------- | -------- | ------- | ------------------------- |
+| `html` | `string` | Yes      | -       | The HTML string to render |
 
 #### Example
 
 ```vue
-<HtmlRenderer :html="myHtmlString" :is-shadow="true" />
+<HtmlRenderer :html="myHtmlString" />
 ```
 
 ---
@@ -312,7 +276,6 @@ Notes and caveats:
 ```typescript
 interface IHtmlRendererOptions {
   html: string // The HTML string to render
-  isShadow?: boolean // Whether to use Shadow DOM mode (default: false)
 }
 ```
 
@@ -322,7 +285,7 @@ interface IHtmlRendererOptions {
 interface IHtmlRendererComposable {
   hostRef: Ref<HTMLElement | undefined> // Template ref for the host element
   clear: () => void // Function to clear rendered content
-  shadowRoot?: Ref<ShadowRoot | undefined> // Shadow root ref (shadow mode only)
+  shadowRoot: Ref<ShadowRoot | undefined> // Shadow root ref
 }
 ```
 
@@ -331,7 +294,6 @@ interface IHtmlRendererComposable {
 ```typescript
 const { hostRef, clear, shadowRoot } = useHtmlRenderer({
   html: '<div>Content</div>',
-  isShadow: true,
 })
 ```
 
@@ -365,49 +327,17 @@ See `types.ts` for complete type definitions:
 - `IHtmlRendererComposable`
 - `IHtmlRendererProps`
 - `IScriptMeta`
-- `RenderMode`
 - `IFontFaceExtractionOptions`
-
----
-
-## ⚖️ Rendering Modes Comparison
-
-| Feature              | Direct Mode                   | Shadow Mode                                |
-| -------------------- | ----------------------------- | ------------------------------------------ |
-| **Script Execution** | ✅ Yes (full support)         | ❌ No (by design)                          |
-| **Style Isolation**  | ❌ No (uses parent styles)    | ✅ Yes (complete isolation)                |
-| **HTML Structure**   | Partial                       | ✅ Complete (`<html>`, `<body>`, `<head>`) |
-| **Font Loading**     | ✅ Automatic                  | ✅ Automatic (@font-face injection)        |
-| **Performance**      | Fast                          | Very Fast                                  |
-| **Security**         | Requires trust in HTML source | Higher (no scripts)                        |
-| **Use Cases**        | Interactive content, widgets  | Documents, formatted content               |
-
-### When to Use Direct Mode
-
-- ✅ You need JavaScript to execute
-- ✅ You trust the HTML source
-- ✅ You want interactive content
-- ✅ You need to share parent document styles
-- ✅ You're rendering dynamic widgets
-
-### When to Use Shadow Mode
-
-- ✅ You need style isolation
-- ✅ You don't need scripts
-- ✅ You're rendering formatted documents (coupons, certificates, vouchers)
-- ✅ You want to prevent CSS conflicts
-- ✅ You need to preserve complete HTML structure
-- ✅ Security is a priority (no script execution)
 
 ---
 
 ## 💡 Examples
 
-### Example 1: Rendering a Coupon (Shadow Mode)
+### Example 1: Rendering a Styled Coupon
 
 ```vue
 <template>
-  <HtmlRenderer :html="couponHtml" :is-shadow="true" />
+  <HtmlRenderer :html="couponHtml" />
 </template>
 
 <script setup lang="ts">
@@ -444,11 +374,11 @@ const couponHtml = `
 </script>
 ```
 
-### Example 2: Interactive Widget (Direct Mode)
+### Example 2: Interactive Widget with Scripts
 
 ```vue
 <template>
-  <HtmlRenderer :html="widgetHtml" :is-shadow="false" />
+  <HtmlRenderer :html="widgetHtml" />
 </template>
 
 <script setup lang="ts">
@@ -474,7 +404,7 @@ const widgetHtml = `
 
 ```vue
 <template>
-  <HtmlRenderer :html="scriptHtml" :is-shadow="false" />
+  <HtmlRenderer :html="scriptHtml" />
 </template>
 
 <script setup lang="ts">
@@ -495,10 +425,10 @@ const scriptHtml = `
 
 ### Security
 
-1. **Always sanitize untrusted HTML** before rendering in direct mode
-2. **Use shadow mode** for content from untrusted sources (no script execution)
-3. **Validate external script sources** when using direct mode
-4. **Be cautious with inline event handlers** (`onclick`, etc.)
+1. **Always sanitize untrusted HTML** before rendering
+2. **Validate external script sources** before including them
+3. **Be cautious with inline event handlers** (`onclick`, etc.)
+4. **Review scripts** in HTML content from external sources
 
 ### Performance
 
@@ -509,12 +439,12 @@ const scriptHtml = `
 
 ### Styling
 
-1. **Shadow mode**: Include all styles in the HTML string (they won't leak)
-2. **Direct mode**: Be aware of style inheritance from parent document
-3. **Use scoped styles** in parent components to avoid conflicts
-4. **Test font loading** in shadow mode (fonts are automatically injected)
+1. **Include all styles in the HTML string** - they are isolated and won't leak to the parent document
+2. **Use @font-face declarations** - they are automatically extracted and injected into the main document
+3. **Take advantage of style isolation** - parent document styles won't affect rendered content
+4. **Test font loading** - fonts are automatically injected into the main document
 
-### Script Execution (Direct Mode)
+### Script Execution
 
 1. **Understand execution order**: Sequential → Async (fire-and-forget) → Defer
 2. **Use `defer`** for scripts that need DOM to be ready

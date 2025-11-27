@@ -32,6 +32,9 @@ export default defineConfig({
       fileName: 'vue-html-renderer',
     },
     rolldownOptions: {
+      // Externalize Vue - don't bundle it with the library
+      // Users will provide Vue as a peer dependency
+      external: ['vue'],
       output: {
         // Preserve exports from the entry point
         exports: 'named',

@@ -17,19 +17,6 @@ export interface IHtmlRendererOptions {
    * Can be a complete HTML document or a fragment.
    */
   html: string
-
-  /**
-   * Whether to render in Shadow DOM mode.
-   *
-   * - `false` (default): Renders HTML directly with script execution support.
-   *   Use this when you need JavaScript to run (e.g., interactive content).
-   *
-   * - `true`: Renders HTML in an isolated Shadow DOM with style scoping.
-   *   Use this when you need style isolation and don't need script execution.
-   *
-   * @default false
-   */
-  isShadow?: boolean
 }
 
 /**
@@ -50,16 +37,15 @@ export interface IHtmlRendererComposable {
   hostRef: Ref<HTMLElement | undefined>
 
   /**
-   * Function to clear all rendered content from the host element.
+   * Function to clear all rendered content from the shadow root.
    * Useful for manual cleanup or re-rendering scenarios.
    */
   clear: () => void
 
   /**
-   * Reference to the Shadow Root (only available when isShadow=true).
-   * Will be undefined in non-shadow mode.
+   * Reference to the Shadow Root.
    */
-  shadowRoot?: Ref<ShadowRoot | undefined>
+  shadowRoot: Ref<ShadowRoot | undefined>
 }
 
 /**
@@ -71,21 +57,11 @@ export interface IHtmlRendererProps {
    * Required prop that contains the content to display.
    */
   html: string
-
-  /**
-   * Whether to render in Shadow DOM mode.
-   *
-   * - `false` (default): Direct rendering with script execution
-   * - `true`: Shadow DOM rendering with style isolation
-   *
-   * @default false
-   */
-  isShadow?: boolean
 }
 
 /**
  * Metadata for a <script> tag extracted from HTML.
- * Used internally by the non-shadow renderer for script execution.
+ * Used internally by the renderer for script execution.
  */
 export interface IScriptMeta {
   /**
@@ -131,24 +107,7 @@ export interface IScriptMeta {
 }
 
 /**
- * Rendering mode enum for better type safety
- */
-export enum RenderMode {
-  /**
-   * Direct rendering with script execution support.
-   * Scripts are executed respecting async/defer/sequential semantics.
-   */
-  Direct = 'direct',
-
-  /**
-   * Shadow DOM rendering with style isolation.
-   * Scripts are NOT executed; styles are scoped to shadow tree.
-   */
-  Shadow = 'shadow',
-}
-
-/**
- * Configuration for font-face extraction (Shadow DOM mode only)
+ * Configuration for font-face extraction
  */
 export interface IFontFaceExtractionOptions {
   /**
