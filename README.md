@@ -28,7 +28,7 @@ This library provides a unified solution for rendering HTML content in Vue appli
 
 - **Script Execution**: Execute embedded JavaScript with proper browser-like semantics
 - **Style Isolation**: Prevent CSS conflicts using Shadow DOM
-- **Font Loading**: Proper @font-face handling in Shadow DOM, including resolving `@import` CSS files recursively
+- **Font Loading**: Proper @font-face handling in Shadow DOM, including resolving `@import` CSS files recursively and fetching linked stylesheets via `<link rel="stylesheet" href="…">`
 - **HTML Structure Preservation**: Maintain complete HTML structure including `<html>`, `<head>`, and `<body>` tags
 
 ## 🚫 Why Not iFrame?
@@ -111,16 +111,19 @@ The library is organized by responsibility for easy maintenance and potential li
 ```
 vue-html-renderer/
 ├── src/
-│   ├── App.vue                    # Main Vue component
-│   ├── main.ts                    # Library entry point (exports)
+│   ├── App.vue                    # Demo app component (for local development)
 │   ├── extras/
 │   │   ├── types.ts               # TypeScript type definitions
 │   │   └── utils.ts               # Shared utility functions
 │   ├── composables/
 │   │   └── useHtmlRenderer.ts     # Composable (internal use)
-│   └── renderers/
-│       ├── shadowRenderer.ts      # Shadow DOM rendering logic
-│       └── directRenderer.ts      # Direct rendering with script execution
+│   ├── renderers/
+│   │   ├── shadowRenderer.ts      # Shadow DOM rendering orchestrator
+│   │   └── directRenderer.ts      # Direct rendering with script execution
+│   └── styles/                    # Font-face extraction utilities (SRP-focused)
+│       ├── cssUtils.ts            # Pure CSS/text helpers (strip, imports, rebase URLs, base URL)
+│       ├── fontFaceCollector.ts   # Recursively collect @font-face from <style>, @import, and <link>
+│       └── fontInjector.ts        # Dedup and inject into <head> (#shadow-dom-fonts)
 └── README.md                      # This file
 ```
 
@@ -131,6 +134,28 @@ vue-html-renderer/
 3. **Extensibility**: Easy to add new rendering modes or features
 4. **Reusability**: Framework-agnostic utilities can be used outside Vue
 5. **Documentation**: Every function and type is thoroughly documented
+
+### Module Responsibilities (Robust Split)
+
+- `renderers/shadowRenderer.ts`
+  - Orchestrates Shadow DOM rendering
+  - Parses HTML and delegates font work to style modules
+  - Public API: `extractAndInjectFontFaces`, `renderIntoShadowRoot`, `clearShadowRoot`
+
+- `styles/cssUtils.ts`
+  - Pure functions for CSS manipulation and URL handling
+  - `stripComments`, `extractFontFaceBlocks`, `createImportRegex`, `resolveUrl`, `rebaseUrls`, `getDocBaseUrl`
+
+- `styles/fontFaceCollector.ts`
+  - Recursively collects `@font-face` rules from:
+    - Inline `<style>` blocks
+    - `@import` chains (nested imports supported)
+    - External stylesheets via `<link rel="stylesheet" href="…">` and preloaded styles (`rel="preload" as="style"`)
+  - Deduplicates visited URLs and rebases relative `url()` sources
+
+- `styles/fontInjector.ts`
+  - Injects collected rules into a single `<style id="shadow-dom-fonts">` in `document.head`
+  - Avoids duplicate rules by comparing against existing content
 
 ---
 
@@ -227,9 +252,11 @@ const { hostRef, clear } = useHtmlRenderer({
 </script>
 ```
 
-#### Async font loading and @import support
+#### Async font loading: `@import` and external `<link rel="stylesheet">`
 
-Font rules referenced via CSS `@import` are fetched asynchronously and recursively resolved. When you use the `HtmlRenderer` component or the `useHtmlRenderer` composable, this is handled automatically. If you directly call the lower-level renderer, remember it is async:
+Font rules referenced via CSS `@import` are fetched asynchronously and recursively resolved. In addition, external stylesheets linked with `<link rel="stylesheet" href="…">` inside the provided HTML are fetched and scanned for `@font-face` declarations as well. Relative `url()` sources in collected font rules are rebased to absolute URLs based on the stylesheet URL.
+
+When you use the `HtmlRenderer` component or the `useHtmlRenderer` composable, this is handled automatically. If you directly call the lower-level renderer, remember it is async:
 
 ```ts
 import { renderIntoShadowRoot } from './src/renderers/shadowRenderer'
@@ -238,6 +265,24 @@ const host = document.createElement('div')
 const shadow = host.attachShadow({ mode: 'open' })
 await renderIntoShadowRoot(shadow, '<html><head><style>@import url("https://cdn.example.com/fonts.css");</style></head><body>Hi</body></html>')
 ```
+
+You can also rely on linked stylesheets in the HTML you render:
+
+```html
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.example.com/site-styles.css" />
+  </head>
+  <body>Content</body>
+  
+</html>
+```
+
+Notes and caveats:
+- External fetches must comply with CORS. If the remote server doesn’t allow cross-origin requests, stylesheets/fonts may not be retrievable by the extractor.
+- Media queries on `<link media="…">` are respected; links that don’t match the current environment are skipped.
+- Alternate stylesheets (`rel` containing `alternate`) and disabled links are skipped.
 
 ---
 
