@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mixed content test page" />
+    <title>Mixed Content Test</title>
+    
+    <style>
+      :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --bg-color: #f8f9fa;
+        --text-color: #333;
+      }
+      
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg-color);
+        color: var(--text-color);
+        padding: 20px;
+        margin: 0;
+      }
+      
+      .section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+      }
+      
+      .card {
+        background: var(--bg-color);
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      [data-status="active"] {
+        border-left: 4px solid var(--secondary-color);
+      }
+      
+      [data-status="pending"] {
+        border-left: 4px solid #f39c12;
+      }
+      
+      [data-status="inactive"] {
+        border-left: 4px solid #e74c3c;
+      }
+      
+      .media-container {
+        max-width: 100%;
+        overflow: hidden;
+      }
+      
+      img, video, audio {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      .tag {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        margin: 2px;
+      }
+      
+      .tag-primary { background: var(--primary-color); color: white; }
+      .tag-secondary { background: var(--secondary-color); color: white; }
+    </style>
+  </head>
+  <body>
+    <h1>Mixed Content Test</h1>
+    <p>Testing various HTML5 elements and content types.</p>
+    
+    <!-- Section with data attributes -->
+    <section class="section" data-section-id="data-attrs" data-testid="data-section">
+      <h2>Data Attributes</h2>
+      <div class="grid">
+        <div class="card" data-status="active" data-id="1" data-category="premium">
+          <h3>Active Item</h3>
+          <p>Status: Active</p>
+          <span class="tag tag-secondary">Premium</span>
+        </div>
+        <div class="card" data-status="pending" data-id="2" data-category="standard">
+          <h3>Pending Item</h3>
+          <p>Status: Pending</p>
+          <span class="tag tag-primary">Standard</span>
+        </div>
+        <div class="card" data-status="inactive" data-id="3" data-category="basic">
+          <h3>Inactive Item</h3>
+          <p>Status: Inactive</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section with semantic elements -->
+    <section class="section" data-section-id="semantic">
+      <h2>Semantic Elements</h2>
+      <article>
+        <header>
+          <h3>Article Title</h3>
+          <time datetime="2024-01-15">January 15, 2024</time>
+        </header>
+        <p>This is the article content with <strong>bold</strong>, <em>italic</em>, and <mark>highlighted</mark> text.</p>
+        <footer>
+          <small>Written by Author</small>
+        </footer>
+      </article>
+      
+      <details>
+        <summary>Click to expand details</summary>
+        <p>This is hidden content that can be expanded.</p>
+      </details>
+      
+      <figure>
+        <figcaption>A placeholder image description</figcaption>
+      </figure>
+    </section>
+    
+    <!-- Section with form elements -->
+    <section class="section" data-section-id="forms">
+      <h2>Form Elements</h2>
+      <form id="test-form" data-form-type="contact">
+        <fieldset>
+          <legend>Contact Information</legend>
+          <div style="margin: 10px 0;">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required />
+          </div>
+          <div style="margin: 10px 0;">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" />
+          </div>
+          <div style="margin: 10px 0;">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="3" placeholder="Your message"></textarea>
+          </div>
+          <div style="margin: 10px 0;">
+            <label>
+              <input type="checkbox" name="subscribe" value="yes" />
+              Subscribe to newsletter
+            </label>
+          </div>
+          <div style="margin: 10px 0;">
+            <label for="priority">Priority:</label>
+            <select id="priority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <button type="submit">Submit</button>
+        </fieldset>
+      </form>
+    </section>
+    
+    <!-- Section with lists -->
+    <section class="section" data-section-id="lists">
+      <h2>List Elements</h2>
+      <div class="grid">
+        <div>
+          <h3>Ordered List</h3>
+          <ol>
+            <li>First item</li>
+            <li>Second item
+              <ol>
+                <li>Nested item 1</li>
+                <li>Nested item 2</li>
+              </ol>
+            </li>
+            <li>Third item</li>
+          </ol>
+        </div>
+        <div>
+          <h3>Unordered List</h3>
+          <ul>
+            <li>Apple</li>
+            <li>Banana</li>
+            <li>Cherry</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Definition List</h3>
+          <dl>
+            <dt>HTML</dt>
+            <dd>HyperText Markup Language</dd>
+            <dt>CSS</dt>
+            <dd>Cascading Style Sheets</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section with table -->
+    <section class="section" data-section-id="table">
+      <h2>Table Element</h2>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid #ddd; padding: 10px;">ID</th>
+            <th style="border: 1px solid #ddd; padding: 10px;">Name</th>
+            <th style="border: 1px solid #ddd; padding: 10px;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-row-id="1">
+            <td style="border: 1px solid #ddd; padding: 10px;">001</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">Item One</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">Active</td>
+          </tr>
+          <tr data-row-id="2">
+            <td style="border: 1px solid #ddd; padding: 10px;">002</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">Item Two</td>
+            <td style="border: 1px solid #ddd; padding: 10px;">Pending</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+              <em>End of table</em>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+    
+    <!-- Scripts for verification -->
+    <script>
+      window.__mixedContentLoaded = true;
+      
+      // Count elements
+      window.__sectionCount = document.querySelectorAll('.section').length;
+      window.__cardCount = document.querySelectorAll('.card').length;
+      window.__formCount = document.querySelectorAll('form').length;
+      window.__tableCount = document.querySelectorAll('table').length;
+      
+      // Count data attributes
+      window.__dataStatusElements = document.querySelectorAll('[data-status]').length;
+      window.__dataIdElements = document.querySelectorAll('[data-id]').length;
+    </script>
+    
+    <script>
+      // Test DOM manipulation
+      const sections = document.querySelectorAll('[data-section-id]');
+      window.__sectionsWithDataId = sections.length;
+      
+      // Add a marker to verify script ran
+      const marker = document.createElement('div');
+      marker.id = 'script-marker';
+      marker.setAttribute('data-executed', 'true');
+      marker.style.display = 'none';
+      document.body.appendChild(marker);
+    </script>
+  </body>
+</html>

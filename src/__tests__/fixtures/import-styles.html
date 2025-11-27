@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS @import Test</title>
+    
+    <style>
+      /* Test CSS @import with data URL (inline CSS) */
+      @import url("data:text/css,.imported-style { color: blue; font-weight: bold; }");
+      
+      /* Test multiple @import statements */
+      @import url("data:text/css,.secondary-import { background-color: #f0f0f0; padding: 10px; }");
+      
+      /* Test @import with media query */
+      @import url("data:text/css,.media-import { border: 2px solid green; }") screen;
+      
+      :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --import-indicator: #e74c3c;
+      }
+      
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 20px;
+        background-color: #fafafa;
+        margin: 0;
+      }
+      
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      
+      h1 {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--secondary-color);
+        padding-bottom: 10px;
+      }
+      
+      .section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      .section h2 {
+        margin-top: 0;
+        color: #333;
+      }
+      
+      .test-box {
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+      
+      .import-indicator {
+        display: inline-block;
+        padding: 4px 8px;
+        background: var(--import-indicator);
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 10px;
+      }
+      
+      .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      
+      .status-badge.success {
+        background: #d4edda;
+        color: #155724;
+      }
+      
+      .status-badge.pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+      
+      /* Nested @import test - styles that work with imported styles */
+      .combined-styles {
+        /* This should combine with .imported-style */
+        font-size: 18px;
+        line-height: 1.6;
+      }
+      
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+      }
+      
+      .card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      .card h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+      }
+      
+      .card p {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CSS @import Test <span class="import-indicator">@import</span></h1>
+      
+      <!-- Section testing basic @import -->
+      <section class="section" data-section-id="basic-import">
+        <h2>Basic @import Test</h2>
+        <p>Testing CSS @import directive functionality.</p>
+        
+        <div class="test-box imported-style" data-test="imported-style">
+          This text should be styled by the @import rule (blue and bold).
+        </div>
+        
+        <div class="test-box secondary-import" data-test="secondary-import">
+          This box should have styles from the secondary @import (gray background, padding).
+        </div>
+        
+        <div class="test-box media-import" data-test="media-import">
+          This box should have a green border from the media query @import.
+        </div>
+      </section>
+      
+      <!-- Section testing combined styles -->
+      <section class="section" data-section-id="combined-import">
+        <h2>Combined Styles Test</h2>
+        <p>Testing how @import styles combine with regular styles.</p>
+        
+        <div class="test-box imported-style combined-styles" data-test="combined">
+          This element uses both imported and regular styles together.
+        </div>
+      </section>
+      
+      <!-- Section with verification elements -->
+      <section class="section" data-section-id="verification">
+        <h2>Verification Status</h2>
+        
+        <div class="grid">
+          <div class="card" data-card-id="import-basic">
+            <h3>Basic @import</h3>
+            <p id="basic-import-status">Checking...</p>
+          </div>
+          <div class="card" data-card-id="import-secondary">
+            <h3>Secondary @import</h3>
+            <p id="secondary-import-status">Checking...</p>
+          </div>
+          <div class="card" data-card-id="import-media">
+            <h3>Media Query @import</h3>
+            <p id="media-import-status">Checking...</p>
+          </div>
+        </div>
+        
+        <div id="import-result" class="test-box" data-import-verified="false">
+          <strong>Import Test Result:</strong>
+          <span id="result-text">Waiting for verification...</span>
+        </div>
+      </section>
+      
+      <!-- Additional test elements -->
+      <section class="section" data-section-id="additional">
+        <h2>Additional Import Scenarios</h2>
+        
+        <div class="test-box" data-scenario="multiple-classes">
+          <span class="imported-style">Imported</span> + 
+          <span class="secondary-import">Secondary</span> + 
+          <span class="media-import">Media</span>
+        </div>
+        
+        <details>
+          <summary>View @import syntax used</summary>
+          <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto;">
+@import url("data:text/css,.imported-style { ... }");
+@import url("data:text/css,.secondary-import { ... }");
+@import url("data:text/css,.media-import { ... }") screen;
+          </pre>
+        </details>
+      </section>
+    </div>
+    
+    <script>
+      // Mark that import styles test is loaded
+      window.__importStylesLoaded = true;
+      
+      // Count import-related elements
+      window.__importTestElements = {
+        importedStyle: document.querySelectorAll('.imported-style').length,
+        secondaryImport: document.querySelectorAll('.secondary-import').length,
+        mediaImport: document.querySelectorAll('.media-import').length,
+        sections: document.querySelectorAll('.section').length,
+        cards: document.querySelectorAll('.card').length
+      };
+      
+      // Check if styles are applied (this runs after style parsing)
+      const importedEl = document.querySelector('.imported-style');
+      if (importedEl) {
+        const styles = window.getComputedStyle(importedEl);
+        window.__importedStyleApplied = {
+          color: styles.color,
+          fontWeight: styles.fontWeight
+        };
+        importedEl.setAttribute('data-styles-checked', 'true');
+      }
+      
+      const secondaryEl = document.querySelector('.secondary-import');
+      if (secondaryEl) {
+        const styles = window.getComputedStyle(secondaryEl);
+        window.__secondaryImportApplied = {
+          backgroundColor: styles.backgroundColor,
+          padding: styles.padding
+        };
+        secondaryEl.setAttribute('data-styles-checked', 'true');
+      }
+      
+      const mediaEl = document.querySelector('.media-import');
+      if (mediaEl) {
+        const styles = window.getComputedStyle(mediaEl);
+        window.__mediaImportApplied = {
+          border: styles.border,
+          borderColor: styles.borderColor
+        };
+        mediaEl.setAttribute('data-styles-checked', 'true');
+      }
+      
+      // Update verification status
+      const resultEl = document.getElementById('import-result');
+      if (resultEl) {
+        resultEl.setAttribute('data-import-verified', 'true');
+        const resultText = document.getElementById('result-text');
+        if (resultText) {
+          resultText.textContent = 'Import tests executed successfully';
+        }
+      }
+      
+      // Add marker for script execution
+      document.body.setAttribute('data-scripts-executed', 'true');
+      
+      console.log('CSS @import test loaded');
+    </script>
+  </body>
+</html>
