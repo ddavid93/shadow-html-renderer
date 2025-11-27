@@ -32,64 +32,150 @@ import { normalizeHtml } from '../extras/utils'
  * ```ts
  * const parser = new DOMParser();
  * const doc = parser.parseFromString(html, "text/html");
- * extractAndInjectFontFaces(doc);
+ * await extractAndInjectFontFaces(doc);
  * ```
  */
-export function extractAndInjectFontFaces(
+export async function extractAndInjectFontFaces(
   doc: Document,
   styleElementId: string = 'shadow-dom-fonts',
-): void {
-  const styleElements = doc.querySelectorAll('style')
-  const fontFaceRules: string[] = []
+): Promise<void> {
+  // Helpers
+  const stripComments = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, '')
 
-  styleElements.forEach((styleEl) => {
-    const cssText = styleEl.textContent || ''
-
-    // Match @font-face blocks with proper brace counting
-    // This handles nested braces and multi-line declarations
+  const extractFontFaceBlocks = (css: string): string[] => {
+    const blocks: string[] = []
     let pos = 0
-    while (pos < cssText.length) {
-      const fontFaceStart = cssText.indexOf('@font-face', pos)
-      if (fontFaceStart === -1) break
-
-      const braceStart = cssText.indexOf('{', fontFaceStart)
-      if (braceStart === -1) break
-
-      // Count braces to find the matching closing brace
-      let braceCount = 1
-      let braceEnd = braceStart + 1
-      while (braceEnd < cssText.length && braceCount > 0) {
-        if (cssText[braceEnd] === '{') braceCount++
-        if (cssText[braceEnd] === '}') braceCount--
-        braceEnd++
+    while (pos < css.length) {
+      const start = css.indexOf('@font-face', pos)
+      if (start === -1) {
+        break
       }
-
-      if (braceCount === 0) {
-        const fontFaceRule = cssText.substring(fontFaceStart, braceEnd).trim()
-        fontFaceRules.push(fontFaceRule)
+      const braceStart = css.indexOf('{', start)
+      if (braceStart === -1) {
+        break
       }
-
-      pos = braceEnd
+      let depth = 1
+      let i = braceStart + 1
+      while (i < css.length && depth > 0) {
+        const ch = css[i]
+        if (ch === '{') {
+          depth++
+        } else if (ch === '}') {
+          depth--
+        }
+        i++
+      }
+      if (depth === 0) {
+        const rule = css.substring(start, i).trim()
+        blocks.push(rule)
+      }
+      pos = i
     }
-  })
+    return blocks
+  }
 
-  // Inject font-face rules into main document if any were found
-  if (fontFaceRules.length > 0) {
-    let fontStyleElement = document.getElementById(styleElementId) as HTMLStyleElement
+  const importRegex = /@import\s+(?:url\(\s*(["']?)([^)"']+)\1\s*\)|(["'])([^"']+)\3)[^;]*;/gi
 
+  const resolveUrl = (url: string, base: string): string => {
+    try {
+      return new URL(url, base).toString()
+    } catch {
+      return url
+    }
+  }
+
+  const getDocBaseUrl = (d: Document): string => {
+    const baseHref = d.querySelector('base[href]')?.getAttribute('href')?.trim()
+    try {
+      if (baseHref) {
+        return new URL(baseHref, document.baseURI).toString()
+      }
+    } catch {
+      // ignore
+    }
+    return document.baseURI || (typeof location !== 'undefined' ? location.href : '')
+  }
+
+  const visited = new Set<string>()
+  const fontSet = new Set<string>()
+
+  const rebaseUrls = (cssBlock: string, baseUrl: string): string => {
+    const urlRe = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)"']+))\s*\)/gi
+    return cssBlock.replace(urlRe, (_m, d1: string, d2: string, d3: string) => {
+      const orig = (d1 ?? d2 ?? d3 ?? '').trim()
+      const quote = d1 != null ? '"' : d2 != null ? "'" : ''
+      // Skip special/absolute URLs
+      if (/^(data:|blob:|http:|https:|\/\/|#)/i.test(orig)) {
+        return `url(${quote}${orig}${quote})`
+      }
+      let abs = orig
+      try {
+        abs = new URL(orig, baseUrl).toString()
+      } catch {
+        // keep original if resolution fails
+      }
+      return `url(${quote}${abs}${quote})`
+    })
+  }
+
+  const processCss = async (cssRaw: string, baseUrl: string): Promise<void> => {
+    const css = stripComments(cssRaw)
+
+    // 1) Collect inline @font-face blocks
+    extractFontFaceBlocks(css).forEach((b) => fontSet.add(rebaseUrls(b, baseUrl)))
+
+    // 2) Resolve @import chains recursively
+    let match: RegExpExecArray | null
+    importRegex.lastIndex = 0
+    while ((match = importRegex.exec(css))) {
+      const url = (match[2] || match[4] || '').trim()
+      if (!url) {
+        continue
+      }
+      const absUrl = resolveUrl(url, baseUrl)
+      if (visited.has(absUrl)) {
+        continue
+      }
+      visited.add(absUrl)
+      try {
+        const res = await fetch(absUrl)
+        if (!res.ok) {
+          continue
+        }
+        const text = await res.text()
+        // The base for nested imports becomes the CSS file URL we just fetched
+        await processCss(text, absUrl)
+      } catch {
+        // Silently ignore fetch errors to avoid breaking rendering
+      }
+    }
+  }
+
+  const styleElements = doc.querySelectorAll('style')
+  const docBase = getDocBaseUrl(doc)
+  for (const styleEl of Array.from(styleElements)) {
+    const cssText = styleEl.textContent || ''
+    await processCss(cssText, docBase)
+  }
+
+  // Inject into main document head, avoid duplicates
+  if (fontSet.size > 0) {
+    let fontStyleElement = document.getElementById(styleElementId) as HTMLStyleElement | null
     if (!fontStyleElement) {
       fontStyleElement = document.createElement('style')
       fontStyleElement.id = styleElementId
       document.head.appendChild(fontStyleElement)
     }
-
-    // Append new font-face rules (avoiding duplicates by checking existing content)
-    const existingContent = fontStyleElement.textContent || ''
-    fontFaceRules.forEach((rule) => {
-      if (!existingContent.includes(rule)) {
-        fontStyleElement.textContent += '\n' + rule
+    const existing = fontStyleElement.textContent || ''
+    let appended = ''
+    for (const rule of fontSet) {
+      if (!existing.includes(rule)) {
+        appended += (appended ? '\n' : '') + rule
       }
-    })
+    }
+    if (appended) {
+      fontStyleElement.textContent += (fontStyleElement.textContent ? '\n' : '') + appended
+    }
   }
 }
 
@@ -111,10 +197,10 @@ export function extractAndInjectFontFaces(
  * ```ts
  * const host = document.createElement('div');
  * const shadowRoot = host.attachShadow({ mode: 'open' });
- * renderIntoShadowRoot(shadowRoot, '<html><body>Content</body></html>');
+ * await renderIntoShadowRoot(shadowRoot, '<html><body>Content</body></html>');
  * ```
  */
-export function renderIntoShadowRoot(shadowRoot: ShadowRoot, html: string): void {
+export async function renderIntoShadowRoot(shadowRoot: ShadowRoot, html: string): Promise<void> {
   // Clear existing content
   while (shadowRoot.firstChild) {
     shadowRoot.removeChild(shadowRoot.firstChild)
@@ -126,7 +212,7 @@ export function renderIntoShadowRoot(shadowRoot: ShadowRoot, html: string): void
 
   // Extract and inject @font-face rules into main document
   // This ensures fonts are loaded at document level and available to shadow DOM
-  extractAndInjectFontFaces(doc)
+  await extractAndInjectFontFaces(doc)
 
   // Import the entire documentElement (html tag and all its contents)
   // This preserves the complete HTML structure including html, head, and body tags

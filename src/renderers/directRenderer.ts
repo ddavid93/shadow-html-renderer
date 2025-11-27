@@ -109,14 +109,22 @@ export function createExecutableScript(meta: IScriptMeta): HTMLScriptElement {
 
   // Forward non-special attributes exactly as provided
   for (const [k, v] of Object.entries(meta.attrs)) {
-    if (k === 'async' || k === 'defer' || k === 'type' || k === 'src') continue
+    if (k === 'async' || k === 'defer' || k === 'type' || k === 'src') {
+      continue
+    }
     s.setAttribute(k, v)
   }
 
   // Apply special flags explicitly so DOM properties/semantics are correct
-  if (meta.isModule) s.type = 'module'
-  if (meta.isAsync) s.async = true
-  if (meta.isDefer) s.defer = true
+  if (meta.isModule) {
+    s.type = 'module'
+  }
+  if (meta.isAsync) {
+    s.async = true
+  }
+  if (meta.isDefer) {
+    s.defer = true
+  }
 
   if (meta.hasSrc && meta.attrs['src']) {
     s.src = normalizeAttr(meta.attrs['src'])

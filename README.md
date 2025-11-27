@@ -17,6 +17,8 @@ A powerful and flexible Vue library for rendering arbitrary HTML content with tw
 - [Rendering Modes Comparison](#rendering-modes-comparison)
 - [Examples](#examples)
 - [Best Practices](#best-practices)
+ - [Code Style](#code-style)
+ - [Contributing](#-contributing)
 
 ---
 
@@ -26,7 +28,7 @@ This library provides a unified solution for rendering HTML content in Vue appli
 
 - **Script Execution**: Execute embedded JavaScript with proper browser-like semantics
 - **Style Isolation**: Prevent CSS conflicts using Shadow DOM
-- **Font Loading**: Proper @font-face handling in Shadow DOM
+- **Font Loading**: Proper @font-face handling in Shadow DOM, including resolving `@import` CSS files recursively
 - **HTML Structure Preservation**: Maintain complete HTML structure including `<html>`, `<head>`, and `<body>` tags
 
 ## 🚫 Why Not iFrame?
@@ -223,6 +225,18 @@ const { hostRef, clear } = useHtmlRenderer({
 // Manually clear content if needed
 // clear();
 </script>
+```
+
+#### Async font loading and @import support
+
+Font rules referenced via CSS `@import` are fetched asynchronously and recursively resolved. When you use the `HtmlRenderer` component or the `useHtmlRenderer` composable, this is handled automatically. If you directly call the lower-level renderer, remember it is async:
+
+```ts
+import { renderIntoShadowRoot } from './src/renderers/shadowRenderer'
+
+const host = document.createElement('div')
+const shadow = host.attachShadow({ mode: 'open' })
+await renderIntoShadowRoot(shadow, '<html><head><style>@import url("https://cdn.example.com/fonts.css");</style></head><body>Hi</body></html>')
 ```
 
 ---
@@ -461,6 +475,29 @@ const scriptHtml = `
 2. **Use `defer`** for scripts that need DOM to be ready
 3. **Use `async`** for independent scripts
 4. **Module scripts** (`type="module"`) are always deferred by default
+
+---
+
+## 🧑‍💻 Code Style
+
+To ensure readability and prevent subtle bugs, this project mandates using braces on all control statements.
+
+- Always use braces for `if`, `else`, `else if`, `for`, `while`, and `do...while` blocks — even for single statements.
+- This rule is enforced via ESLint: `curly: ['error', 'all']`.
+
+Example:
+
+```ts
+// ✅ Correct
+if (condition) {
+  doSomething()
+}
+
+// ❌ Incorrect
+// if (condition) doSomething()
+```
+
+Note: The library code has been updated to follow this guideline everywhere.
 
 ---
 

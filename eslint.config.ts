@@ -22,6 +22,8 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
   {
     rules: {
+      // Enforce curly braces for all control statements
+      curly: ['error', 'all'],
       'vue/multi-word-component-names': 'off',
       'vue/attribute-hyphenation': ['error', 'never'],
       'vue/v-on-event-hyphenation': ['error', 'never'],

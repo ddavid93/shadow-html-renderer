@@ -133,7 +133,7 @@ export function useHtmlRenderer(options: IHtmlRendererOptions): IHtmlRendererCom
         console.error('Shadow root not available for rendering')
         return
       }
-      renderIntoShadowRoot(shadowRoot.value, html)
+      await renderIntoShadowRoot(shadowRoot.value, html)
     } else {
       // Direct mode: Render with script execution
       const target = getTargetEl()
@@ -160,7 +160,9 @@ export function useHtmlRenderer(options: IHtmlRendererOptions): IHtmlRendererCom
    * - Renders HTML directly
    */
   onMounted(() => {
-    if (!hostRef.value) return
+    if (!hostRef.value) {
+      return
+    }
 
     if (isShadow) {
       // Shadow DOM mode: Attach shadow root
