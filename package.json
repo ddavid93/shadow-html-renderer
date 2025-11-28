@@ -13,6 +13,9 @@
     "script-execution",
     "style-isolation"
   ],
+  "publishConfig": {
+    "registry": "https://www.npmjs.com/package/shadow-html-renderer"
+  },
   "homepage": "https://github.com/ddavid93/shadow-html-renderer#readme",
   "bugs": {
     "url": "https://github.com/ddavid93/shadow-html-renderer/issues"
