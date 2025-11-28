@@ -1,6 +1,6 @@
 {
   "name": "shadow-html-renderer",
-  "version": "3.0.2-beta",
+  "version": "3.0.0",
   "description": "A powerful and flexible framework-agnostic library for rendering HTML content into Shadow DOM with style isolation and full script execution support",
   "keywords": [
     "html",

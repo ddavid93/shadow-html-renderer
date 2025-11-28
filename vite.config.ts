@@ -35,8 +35,6 @@ export default defineConfig({
         exports: 'named',
       },
     },
-    // Generate source maps for debugging
-    sourcemap: true,
     // Clear the output directory before building
     emptyOutDir: true,
   },
