@@ -13,9 +13,6 @@
     "script-execution",
     "style-isolation"
   ],
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
   "homepage": "https://github.com/ddavid93/shadow-html-renderer#readme",
   "bugs": {
     "url": "https://github.com/ddavid93/shadow-html-renderer/issues"
