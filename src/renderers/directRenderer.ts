@@ -68,7 +68,7 @@ export function extractScriptsWithPlaceholders(container: HTMLElement): IScriptM
 
     // Replace the original <script> with a comment placeholder so that later
     // we can swap it for a freshly-created <script> that the browser will execute.
-    const placeholder = document.createComment(`DYNAMIC_HTML_SCRIPT:${id}`)
+    const placeholder = document.createComment(`SCRIPT_PLACEHOLDER:${id}`)
     oldScript.replaceWith(placeholder)
 
     metas.push({
