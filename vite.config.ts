@@ -19,6 +19,7 @@ export default defineConfig({
     },
   },
   build: {
+    minify: 'terser',
     lib: {
       // Entry point for the library
       entry: resolve(__dirname, 'src/main.ts'),
